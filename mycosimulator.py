@@ -20,7 +20,7 @@ class section():
     '''
     A structure defining the attributes of a section of mycelium
     '''
-
+    
     def __init__(self, start_point, end_point, growth_vec=[0, 0, 0]):
         # Start point of section (3 dimensional point)
         self.f = np.array(start_point)
