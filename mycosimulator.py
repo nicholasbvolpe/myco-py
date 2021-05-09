@@ -7,6 +7,13 @@ import time
 from math import sin, cos
 from random import uniform
 
+def herons_f(A, B, base):
+    '''
+    Heron's formula, finds height of triangle given its three side lengths
+    '''
+    s = (A+B+base)
+    heron = math.sqrt(s*(s-A)*(s-B)*(s-base))
+    return (2*heron) / base
 
 def normalize(vector):
     '''
@@ -15,8 +22,7 @@ def normalize(vector):
     '''
     return vector/norm(vector)
 
-
-class section():
+class section:
     '''
     A structure defining the attributes of a section of mycelium
     '''
@@ -34,7 +40,11 @@ class section():
         # self.sub_segments = list()
 
 
-class MyceliumSimulator():
+class MyceliumSimulator:
+    '''
+    Used to initialize, run, and visualize simulation
+    '''
+
     def __init__(self):
         self.length = 0  # Total length of mycelium
         self.n = 0  # Number of hyphal sections
@@ -94,11 +104,8 @@ class MyceliumSimulator():
                 D.append(p-np.array(self.sections[x].t))
         # The total field at point p is equal to the sum of the fields on p from every section
         # The direction of the field is the sum of all vectors in D
-        dlen = len(D)
-        #if dlen == 0:
-        #    return np.nan, np.nan
         d = np.sum(D, axis=0)
-        unit_vec = d/norm(d)
+        unit_vec = normalize(d)
         return N_Sp, unit_vec
 
     def neighbors(self, j, dist):
@@ -160,7 +167,7 @@ class MyceliumSimulator():
         print("Total length of mycelium: ", self.length)
         param_str = "Iterations: "+str(ITERATIONS)+" Branch_prob: "+str(branch_probability)+" Neighbor limit: "+str(
             max_nbrs)+" Neighbor dist: "+str(max_dist)+"\nBranch Neighbor limit: "+str(max_branch_nbrs)+" Branch Neighbor dist: "+str(max_branch_dist)
-        sim.gen_plot(param_str)
+        self.gen_plot(param_str)
 
     def run_tropisms(self, ITERATIONS, limit_f1=0.1, branch_probability=0.40, a=1, k=0.5):
         first = time.perf_counter()
@@ -184,8 +191,8 @@ class MyceliumSimulator():
                     vs_n = normalize(vs)
 
                     # Calculate new growth vector
-                    new_growth = k*self.sections[j].g+(1-k)*vs_n
-                    self.sections[j].g = normalize(new_growth)
+                    new_growth = normalize(k*self.sections[j].g+(1-k)*vs_n)
+                    self.sections[j].g = new_growth
 
                     # Branching Step
                     cur_age = self.sections[j].age 
@@ -210,4 +217,4 @@ class MyceliumSimulator():
         print("Total length of mycelium: ", self.length)
         param_str = "Iterations: "+str(ITERATIONS)+" Branch_prob: "+str(
             branch_probability)+" Growth Rate: "+str(a)+" Persistence Factor: "+str(k)
-        sim.gen_plot(param_str)
+        self.gen_plot(param_str)
