@@ -9,7 +9,7 @@ Currently you must import mycosimulator.py in order to run the simulation,
 or run an instance of the MyceliumSimulator class at the end of the file.
 
 ```
-import mycosimulator.py
+from mycosimulator import MyceliumSimulator, section
 
 m = MyceliumSimulator
 
