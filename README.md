@@ -18,8 +18,11 @@ initEndCoord = [0,0,0]
 initGrowthVec = [1,0,0]
 
 s1 = section(initStartCoord,initEndCoord,initGrowthVec)
+s2 = section(initStartCoord,initEndCoord,initGrowthVec)
 
+# The simulation currently needs two starting sections
 m.addSec(s1)
+m.addSec(s2)
 
 m.run_neighbor(self, ITERATIONS, max_dist=15, max_branch_dist=15, max_nbrs=15, max_branch_nbrs=3, branch_probability=0.40, a=1)
 
