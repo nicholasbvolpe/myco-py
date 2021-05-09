@@ -17,7 +17,9 @@ initStartCoord = [0,0,0]
 initEndCoord = [0,0,0]
 initGrowthVec = [1,0,0]
 
-m.addSec(initStartCoord,initEndCoord,initGrowthVec)
+s1 = section(initStartCoord,initEndCoord,initGrowthVec)
+
+m.addSec(s1)
 
 m.run_neighbor(self, ITERATIONS, max_dist=15, max_branch_dist=15, max_nbrs=15, max_branch_nbrs=3, branch_probability=0.40, a=1)
 
