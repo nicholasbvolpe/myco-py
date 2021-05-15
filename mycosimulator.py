@@ -7,13 +7,6 @@ import time
 from math import sin, cos
 from random import uniform
 
-def herons_f(A, B, base):
-    '''
-    Heron's formula, finds height of triangle given its three side lengths
-    '''
-    s = (A+B+base)
-    heron = math.sqrt(s*(s-A)*(s-B)*(s-base))
-    return (2*heron) / base
 
 def normalize(vector):
     '''
@@ -81,14 +74,14 @@ class MyceliumSimulator:
             plt.show()
 
     def hyphal_avoid_field(self, p, index, secLen):
-        N_Sp = 0  # Stores the total field
+        N_Sp = 0.0  # Stores the total field
         D = []  # Stores vectors to p from half-way points of sections in L
         m = 100
         for x in range(secLen):
             if index != x:
                 P_m = []
                 # Stores field values for m points
-                fields = 0 
+                fields = 0.0
                 # Creating vector of m points
                 P_m.extend(zip(np.linspace(self.sections[x].f[0], self.sections[x].t[0], m), np.linspace(
                     self.sections[x].f[1], self.sections[x].t[1], m), np.linspace(self.sections[x].f[2], self.sections[x].t[2], m)))
@@ -107,6 +100,45 @@ class MyceliumSimulator:
         d = np.sum(D, axis=0)
         unit_vec = normalize(d)
         return N_Sp, unit_vec
+
+    def directional_tropisms(self, p, index, secLen):
+        v_agg = []
+        v_d = []
+        for x in range(secLen):
+            if index != x:
+                A = self.sections[x].f
+                B = self.sections[x].t
+                v_AB = B-A # Vector from A to B
+                l = norm(v_AB) # Distance along section, defined by points A and B
+                if l > 0:
+                    a = norm(p-self.sections[x].f)
+                    b = norm(p-self.sections[x].t)
+                    val1a = (b*b-a*a-l*l)
+                    val1b = a*l
+                    val1c = -(val1a/val1b)
+                    val2a = (a*a-b*b-l*l)
+                    val2b = b*l
+                    val2c = -(val2a/val2b)
+                    if val1c >= 0 and val2c >= 0:
+                        # Parallel tropism
+                        vc1 = 1/(0.5*a*(4-((val1a*val1a)/(val1b*val1b)))**0.5)**2
+                        vc2 = (v_AB/l)
+                        v_agg.append(vc1*vc2)
+                        # Perpendicular tropism
+                        k = val1a/l
+                        val3a = ((A[0]-B[0])/l)*k + B[0]
+                        val3b = ((A[1]-B[1])/l)*k + B[1]
+                        val3c = ((A[2]-B[2])/l)*k + B[2]
+                        vec_d = np.array([val3a,val3b,val3c])
+                        v_d.append(normalize(vec_d-p))
+        if v_agg != [] and v_d != []:
+            d1 = np.sum(v_agg, axis=0)
+            d2 = np.sum(v_d, axis=0)
+            d1_n = normalize(d1)
+            d2_n = normalize(d2)
+            return d1_n, d2_n
+        else:
+            return np.array([0,0,0]), np.array([0,0,0])
 
     def neighbors(self, j, dist):
         '''
@@ -169,7 +201,13 @@ class MyceliumSimulator:
             max_nbrs)+" Neighbor dist: "+str(max_dist)+"\nBranch Neighbor limit: "+str(max_branch_nbrs)+" Branch Neighbor dist: "+str(max_branch_dist)
         self.gen_plot(param_str)
 
-    def run_tropisms(self, ITERATIONS, limit_f1=0.1, branch_probability=0.40, a=1, k=0.5):
+    def run_tropisms(self, ITERATIONS, limit_f1=0.1, Ic=0.01, Id=0.01, branch_probability=0.40, a=1, k=0.5):
+        '''
+        Params:
+            limit_f1: limits branching based on density of filaments
+            Ic: Controls the strength of the parallel tropism
+            Id: Controls the strength of the perpendicular tropism
+        '''
         first = time.perf_counter()
         if self.n <= 0: print("No sections")
         for step_i in range(ITERATIONS):
@@ -186,8 +224,8 @@ class MyceliumSimulator:
                     # Each field returns scalar value of field and unit vector
                     # of field on current section's end point (self.sections[j].t)
                     f1, f1u = self.hyphal_avoid_field(self.sections[j].t, j, secLen)
-
-                    vs = f1*f1u
+                    f5, f6 = self.directional_tropisms(self.sections[j].t, j, secLen)
+                    vs = f1*f1u + Ic*f5 + Id*f6
                     vs_n = normalize(vs)
 
                     # Calculate new growth vector
