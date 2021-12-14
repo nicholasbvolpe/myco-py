@@ -4,7 +4,7 @@
 This Python program generates a mycelium-like structure based on simple rules and visualizes it. It is a partial 
 implementation of the Neighbor-Sensing Model as described [here](http://www.davidmoore.org.uk/CyberWEB/images_2016/Manuscripts/Meskauskas_etal_Concerted_regulationNS01.pdf) and [here.](http://www.davidmoore.org.uk/CyberWEB/images_2016/Manuscripts/Meskauskas_etal_simulating_coloniesNS02.pdf)
 
-### Running the sim
+### Running the simulator
 Currently you must import mycosimulator.py in order to run the simulation, 
 or run an instance of the MyceliumSimulator class at the end of the file.
 
